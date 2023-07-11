@@ -8,6 +8,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 
+import org.jsoup.select.Elements;
 import us.codecraft.xsoup.Xsoup;
 
 /**
@@ -35,6 +36,44 @@ public abstract class ElementOperator {
         @Override
         public String toString() {
             return "@" + attribute;
+        }
+    }
+
+    public static class followingSiblingNextText extends ElementOperator {
+
+        public followingSiblingNextText(int group) {
+            this.groupedText = new GroupedText(0);
+            this.index = Math.max(group, 1);
+        }
+
+        private final int index;
+
+        private final GroupedText groupedText;
+
+        @Override
+        public String operate(Element element) {
+            Element parent = element.parent();
+            if (parent == null){
+                return "";
+            }
+            int nextSiblingIndex = element.siblingIndex() + index;
+
+            // 父节点的所所有子节点信息
+            for (Node node : parent.childNodes()) {
+                if (node.siblingIndex() == nextSiblingIndex){
+                    if (node instanceof TextNode){
+                        return ((TextNode) node).text();
+                    }
+                    return groupedText.operate((Element) node);
+                }
+            }
+
+            return "";
+        }
+
+        @Override
+        public String toString() {
+            return "followingSiblingText()";
         }
     }
 

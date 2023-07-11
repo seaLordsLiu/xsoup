@@ -1,9 +1,7 @@
 package us.codecraft.xsoup.xevaluator;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -62,6 +60,7 @@ public class XPathParser {
     private ElementOperator elementOperator;
     private boolean noEvalAllow = false;
     private Pattern patternForText = Pattern.compile("text\\((\\d*)\\)");
+    private Pattern patternForFollowingSiblingText = Pattern.compile("followingSiblingText\\((\\d*)\\)");
 
     public XPathParser(String xpathStr) {
         this.query = xpathStr;
@@ -280,6 +279,9 @@ public class XPathParser {
         if (remainder.startsWith("text(")) {
             functionText(remainder);
         }
+        else if (remainder.startsWith("followingSiblingText(")) {
+            functionFollowingSiblingNextText(remainder);
+        }
         else if (remainder.startsWith("regex(")) {
             functionRegex(remainder);
         }
@@ -340,6 +342,21 @@ public class XPathParser {
                 attributeGroup = Integer.parseInt(group);
             }
             elementOperator = new ElementOperator.GroupedText(attributeGroup);
+        }
+    }
+
+    private void functionFollowingSiblingNextText(String remainder) {
+        Matcher matcher = patternForFollowingSiblingText.matcher(remainder);
+        if (matcher.matches()) {
+            int attributeGroup;
+            String group = matcher.group(1);
+            if (group.equals("")) {
+                attributeGroup = 0;
+            }
+            else {
+                attributeGroup = Integer.parseInt(group);
+            }
+            elementOperator = new ElementOperator.followingSiblingNextText(attributeGroup);
         }
     }
 
